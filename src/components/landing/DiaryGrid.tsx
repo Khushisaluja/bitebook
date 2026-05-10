@@ -18,33 +18,26 @@ export default function DiaryGrid() {
   const [hovered, setHovered] = useState<number | null>(null)
 
   return (
-    <section style={{ background: '#F7F2EC', padding: '7rem 2rem' }}>
+    <section style={{ background: '#F7F2EC', padding: '7rem 2rem', position: 'relative', zIndex: 1 }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
-        <div style={{ marginBottom: '3.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#B8848F', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+        <div style={{ marginBottom: '3.5rem' }}>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#B8848F', letterSpacing: '0.14em', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>
             your diary
           </span>
           <h2 style={{
-            fontSize: 'clamp(2.2rem, 5vw, 3.75rem)',
-            fontWeight: 900,
-            color: '#1A1015',
-            letterSpacing: '-0.03em',
-            lineHeight: 1.05,
+            fontSize: 'clamp(2.2rem, 5vw, 3.75rem)', fontWeight: 900,
+            color: '#1A1015', letterSpacing: '-0.03em', lineHeight: 1.05,
           }}>
-            every bite,{' '}
-            <span style={{ color: '#6E3B47', fontStyle: 'italic' }}>remembered.</span>
+            Every Bite,{' '}
+            <span style={{ color: '#6E3B47', fontStyle: 'italic' }}>Remembered.</span>
           </h2>
-          <p style={{ fontSize: '0.95rem', color: '#9A8288', fontWeight: 400, marginTop: '0.25rem' }}>
-            hover over a page.
+          <p style={{ fontSize: '0.95rem', color: '#9A8288', fontWeight: 400, marginTop: '0.5rem' }}>
+            Hover over a page.
           </p>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-          gap: '1.25rem',
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
           {ENTRIES.map((entry, i) => (
             <motion.div
               key={i}
@@ -60,33 +53,18 @@ export default function DiaryGrid() {
                   : '0 2px 12px rgba(26,16,21,0.05)',
               }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                background: entry.bg,
-                borderRadius: 14,
-                padding: '1.4rem',
-                position: 'relative',
-                overflow: 'hidden',
-                cursor: 'default',
-              }}
+              style={{ background: entry.bg, borderRadius: 14, padding: '1.4rem', position: 'relative', overflow: 'hidden', cursor: 'default' }}
             >
-              {/* Diary lines overlay */}
+              {/* Diary lines */}
               <div style={{
                 position: 'absolute', inset: 0, borderRadius: 14, pointerEvents: 'none',
                 backgroundImage: 'repeating-linear-gradient(transparent, transparent 27px, rgba(110,59,71,0.065) 27px, rgba(110,59,71,0.065) 28px)',
               }} />
+              {/* Margin line */}
+              <div style={{ position: 'absolute', top: 0, bottom: 0, left: 28, width: 1, background: 'rgba(200,100,110,0.15)', pointerEvents: 'none' }} />
 
-              {/* Red margin line */}
-              <div style={{
-                position: 'absolute', top: 0, bottom: 0, left: 28, width: 1,
-                background: 'rgba(200,100,110,0.15)', pointerEvents: 'none',
-              }} />
-
-              {/* Header row */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.1rem', position: 'relative' }}>
-                <span style={{
-                  fontSize: '0.6rem', fontWeight: 700, color: '#B8848F',
-                  letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: 2,
-                }}>
+                <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#B8848F', letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: 2 }}>
                   {entry.date}
                 </span>
                 <motion.span
@@ -98,33 +76,17 @@ export default function DiaryGrid() {
                 </motion.span>
               </div>
 
-              {/* Content */}
               <div style={{ position: 'relative' }}>
-                <p style={{
-                  fontSize: '0.62rem', fontWeight: 700, color: '#B8848F',
-                  letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.3rem',
-                }}>
+                <p style={{ fontSize: '0.62rem', fontWeight: 700, color: '#B8848F', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
                   {entry.place}
                 </p>
-                <p style={{
-                  fontSize: '1rem', fontWeight: 800, color: '#1A1015',
-                  letterSpacing: '-0.015em', lineHeight: 1.2, marginBottom: '0.65rem',
-                }}>
+                <p style={{ fontSize: '1rem', fontWeight: 800, color: '#1A1015', letterSpacing: '-0.015em', lineHeight: 1.2, marginBottom: '0.65rem' }}>
                   {entry.dish}
                 </p>
-                <p style={{
-                  fontSize: '0.72rem', color: '#7A6268', fontStyle: 'italic',
-                  lineHeight: 1.55, marginBottom: '1rem',
-                }}>
+                <p style={{ fontSize: '0.72rem', color: '#7A6268', fontStyle: 'italic', lineHeight: 1.55, marginBottom: '1rem' }}>
                   {entry.note}
                 </p>
-                <span style={{
-                  display: 'inline-block',
-                  fontSize: '0.6rem', fontWeight: 700,
-                  background: 'rgba(110,59,71,0.1)',
-                  color: '#6E3B47', borderRadius: 100,
-                  padding: '3px 10px', letterSpacing: '0.03em',
-                }}>
+                <span style={{ display: 'inline-block', fontSize: '0.6rem', fontWeight: 700, background: 'rgba(110,59,71,0.1)', color: '#6E3B47', borderRadius: 100, padding: '3px 10px', letterSpacing: '0.03em' }}>
                   {entry.tag}
                 </span>
               </div>
@@ -132,18 +94,14 @@ export default function DiaryGrid() {
           ))}
         </div>
 
-        {/* Bottom CTA */}
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          style={{
-            textAlign: 'center', marginTop: '3rem',
-            fontSize: '0.85rem', color: '#9A8288', fontWeight: 500,
-          }}
+          style={{ textAlign: 'center', marginTop: '3rem', fontSize: '0.85rem', color: '#9A8288', fontWeight: 500 }}
         >
-          12,400+ entries logged. yours is next.
+          12,400+ entries logged. Yours is next.
         </motion.p>
       </div>
     </section>

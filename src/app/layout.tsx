@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import SplashScreen from '@/components/SplashScreen'
+import DotGridBackground from '@/components/DotGridBackground'
 import Navbar from '@/components/nav/Navbar'
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <SplashScreen />
+        <DotGridBackground />
         <Navbar />
         {children}
       </body>

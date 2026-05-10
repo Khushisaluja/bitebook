@@ -4,14 +4,15 @@ import Image from 'next/image'
 
 export default function Footer() {
   return (
-    <footer style={{ background: '#1A1015', padding: '4rem 2rem 2rem', color: '#FAF5F0' }}>
+    <footer style={{ background: '#1A1015', padding: '4rem 2rem 2rem', color: '#FAF5F0', position: 'relative', zIndex: 1 }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
           {/* Brand */}
           <div>
             <Image src="/bitebooklogo-new.png" alt="bitebook" width={140} height={48} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9, marginBottom: 16 }} />
             <p style={{ fontSize: '0.9rem', color: 'rgba(250,245,240,0.5)', lineHeight: 1.7, maxWidth: 260 }}>
-              a social food diary for those who eat with intention.
+              A social food diary for those who eat with intention.<br />
+              <span style={{ fontStyle: 'italic', opacity: 0.7 }}>Life is short. Eat intentionally.</span>
             </p>
           </div>
           {/* Links */}
