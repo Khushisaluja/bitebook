@@ -34,7 +34,7 @@ export default function Navbar() {
     >
       {/* Logo */}
       <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
-        <Image src="/bitebook-logo.png" alt="bitebook" width={120} height={40} style={{ objectFit: 'contain' }} />
+        <Image src="/bitebooklogo-new.png" alt="bitebook" width={155} height={52} style={{ objectFit: 'contain' }} />
       </Link>
 
       {/* Nav links — hidden on mobile */}

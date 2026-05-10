@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import CustomCursor from '@/components/cursor/CustomCursor'
+import SplashScreen from '@/components/SplashScreen'
 import Navbar from '@/components/nav/Navbar'
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <CustomCursor />
+        <SplashScreen />
         <Navbar />
         {children}
       </body>

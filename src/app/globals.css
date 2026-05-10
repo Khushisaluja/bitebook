@@ -90,7 +90,6 @@
 }
 
 html {
-  cursor: none;
   scroll-behavior: smooth;
 }
 
@@ -103,7 +102,7 @@ body {
 }
 
 a, button, [role="button"] {
-  cursor: none;
+  cursor: pointer;
 }
 
 ::selection {

@@ -1,5 +1,6 @@
 import Hero from '@/components/landing/Hero'
 import MarqueeStrip from '@/components/ui/MarqueeStrip'
+import DiaryGrid from '@/components/landing/DiaryGrid'
 import ValueStrip from '@/components/landing/ValueStrip'
 import SocialProof from '@/components/landing/SocialProof'
 import FeatureHighlights from '@/components/landing/FeatureHighlights'
@@ -10,6 +11,7 @@ export default function LandingPage() {
     <main>
       <Hero />
       <MarqueeStrip />
+      <DiaryGrid />
       <ValueStrip />
       <SocialProof />
       <FeatureHighlights />

@@ -9,7 +9,7 @@ export default function Footer() {
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
           {/* Brand */}
           <div>
-            <Image src="/bitebook-logo.png" alt="bitebook" width={110} height={36} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9, marginBottom: 16 }} />
+            <Image src="/bitebooklogo-new.png" alt="bitebook" width={140} height={48} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9, marginBottom: 16 }} />
             <p style={{ fontSize: '0.9rem', color: 'rgba(250,245,240,0.5)', lineHeight: 1.7, maxWidth: 260 }}>
               a social food diary for those who eat with intention.
             </p>
@@ -34,6 +34,11 @@ export default function Footer() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Submark */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+          <Image src="/bitebook-submark.png" alt="" width={32} height={32} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.25 }} />
         </div>
 
         {/* Bottom */}
