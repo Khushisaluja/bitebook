@@ -2,16 +2,22 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 
+// Cards live ONLY in the left/right gutters (no center column) so they never
+// collide with the centered hero text. They flip on hover to reveal a photo
+// of the dish from /public/dishes/<slug>.jpg.
 const BG_CARDS = [
-  { top: '8%', left: '3%', rot: '-4deg', color: '#C4A0A8', label: 'Blue Tokai', dish: 'Ethiopian Pour Over', tag: '#quiet corner', w: 200 },
-  { top: '15%', right: '4%', rot: '3deg', color: '#B8CBA8', label: 'Perch', dish: 'Burrata Toast', tag: '#soft luxury', w: 190 },
-  { top: '55%', left: '2%', rot: '-2deg', color: '#D4B896', label: 'Kopi Klub', dish: 'Cold Brew Float', tag: '#golden hour', w: 180 },
-  { top: '65%', right: '5%', rot: '5deg', color: '#A8B8C8', label: 'Suzette', dish: 'Salted Caramel Crêpe', tag: '#rainy day solo', w: 210 },
-  { top: '30%', left: '6%', rot: '2deg', color: '#C8B8A8', label: 'Fig & Maple', dish: 'Ricotta Pancakes', tag: '#sunday slow', w: 175 },
-  { top: '40%', right: '2%', rot: '-3deg', color: '#B8C4A8', label: 'Naaru', dish: 'Miso Ramen', tag: '#cozy corner', w: 195 },
-  { top: '78%', left: '8%', rot: '4deg', color: '#C8A8B0', label: 'La Folie', dish: 'Pistachio Tart', tag: '#quiet luxury', w: 185 },
-  { top: '20%', left: '45%', rot: '-1deg', color: '#D8C8B8', label: 'Smoke House', dish: 'Pulled Pork Slider', tag: '#late night', w: 165 },
+  // left gutter
+  { top: '9%',  left: '2%',   rot: '-4deg', color: '#C4A0A8', label: 'Blue Tokai',  dish: 'Ethiopian Pour Over',   tag: '#quiet corner',  slug: 'ethiopian-pour-over',   w: 198, h: 150 },
+  { top: '33%', left: '4.5%', rot: '2deg',  color: '#C8B8A8', label: 'Fig & Maple',  dish: 'Ricotta Pancakes',      tag: '#sunday slow',   slug: 'ricotta-pancakes',      w: 178, h: 144 },
+  { top: '56%', left: '1.5%', rot: '-2deg', color: '#D4B896', label: 'Kopi Klub',    dish: 'Cold Brew Float',       tag: '#golden hour',   slug: 'cold-brew-float',       w: 184, h: 148 },
+  { top: '79%', left: '6%',   rot: '4deg',  color: '#C8A8B0', label: 'La Folie',     dish: 'Pistachio Tart',        tag: '#quiet luxury',  slug: 'pistachio-tart',        w: 170, h: 140 },
+  // right gutter
+  { top: '13%', right: '3%',   rot: '3deg',  color: '#B8CBA8', label: 'Perch',        dish: 'Burrata Toast',         tag: '#soft luxury',   slug: 'burrata-toast',         w: 190, h: 148 },
+  { top: '37%', right: '1.5%', rot: '-3deg', color: '#B8C4A8', label: 'Naaru',        dish: 'Miso Ramen',            tag: '#cozy corner',   slug: 'miso-ramen',            w: 194, h: 150 },
+  { top: '60%', right: '5%',   rot: '5deg',  color: '#A8B8C8', label: 'Suzette',      dish: 'Salted Caramel Crêpe',  tag: '#rainy day solo',slug: 'salted-caramel-crepe',  w: 182, h: 146 },
+  { top: '81%', right: '2.5%', rot: '-1deg', color: '#D8C8B8', label: 'Smoke House',  dish: 'Pulled Pork Slider',    tag: '#late night',    slug: 'pulled-pork-slider',    w: 168, h: 140 },
 ]
 
 const PUNS = [
@@ -24,6 +30,31 @@ const PUNS = [
 ]
 
 const words = ['Taste', 'Has', 'a', 'Memory.']
+
+// Photo for the flipped card back. Uses next/image so the GitHub Pages
+// basePath is prepended automatically. Tries common extensions, then
+// gracefully unmounts (revealing the colour + caption underneath) if the
+// photo hasn't been added to /public/dishes yet.
+const DISH_EXTS = ['jpg', 'png', 'jpeg', 'webp']
+function DishPhoto({ slug, alt }: { slug: string; alt: string }) {
+  const [extIdx, setExtIdx] = useState(0)
+  const [failed, setFailed] = useState(false)
+  if (failed) return null
+  return (
+    <Image
+      className="bb-flip-photo"
+      src={`/dishes/${slug}.${DISH_EXTS[extIdx]}`}
+      alt={alt}
+      fill
+      sizes="200px"
+      style={{ objectFit: 'cover' }}
+      onError={() => {
+        if (extIdx < DISH_EXTS.length - 1) setExtIdx(extIdx + 1)
+        else setFailed(true)
+      }}
+    />
+  )
+}
 
 function PunBadge() {
   const [idx, setIdx] = useState(0)
@@ -87,32 +118,63 @@ export default function Hero() {
         overflow: 'hidden', paddingTop: 64,
       }}
     >
-      {/* Floating background cards */}
-      {BG_CARDS.map((card, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            top: card.top, left: card.left,
-            right: (card as { right?: string }).right,
-            width: card.w, background: card.color,
-            borderRadius: 16, padding: '1rem',
-            opacity: 0.52,
-            transform: `rotate(${card.rot})`,
-            animation: `float ${5 + i * 0.7}s ease-in-out ${i * 0.4}s infinite`,
-            ['--r' as string]: card.rot,
-            boxShadow: '0 8px 32px rgba(26,16,21,0.08)',
-          } as React.CSSProperties}
-        >
-          <p style={{ fontSize: '0.65rem', fontWeight: 700, color: '#1A1015', opacity: 0.7, marginBottom: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            {card.label}
-          </p>
-          <p style={{ fontSize: '0.8rem', fontWeight: 500, color: '#1A1015', marginBottom: 8 }}>{card.dish}</p>
-          <span style={{ fontSize: '0.65rem', background: 'rgba(26,16,21,0.1)', borderRadius: 100, padding: '2px 8px', color: '#1A1015', fontWeight: 500 }}>
-            {card.tag}
-          </span>
-        </div>
-      ))}
+      {/* Floating flip cards — left/right gutters only. Hover flips to a dish photo. */}
+      <div className="bb-hero-cards" aria-hidden="true">
+        {BG_CARDS.map((card, i) => (
+          <div
+            key={i}
+            className="bb-flip-trigger"
+            tabIndex={0}
+            style={{
+              position: 'absolute',
+              top: card.top, left: card.left,
+              right: (card as { right?: string }).right,
+              width: card.w, height: card.h,
+              transform: `rotate(${card.rot})`,
+              animation: `float ${5 + i * 0.7}s ease-in-out ${i * 0.4}s infinite`,
+              ['--r' as string]: card.rot,
+            } as React.CSSProperties}
+          >
+            <div className="bb-flip">
+              {/* FRONT — restaurant / dish / tag */}
+              <div
+                className="bb-flip-face"
+                style={{
+                  background: card.color,
+                  padding: '1rem',
+                  boxShadow: '0 8px 32px rgba(26,16,21,0.10)',
+                }}
+              >
+                <span className="bb-flip-hint">↺</span>
+                <p style={{ fontSize: '0.65rem', fontWeight: 700, color: '#1A1015', opacity: 0.7, marginBottom: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  {card.label}
+                </p>
+                <p style={{ fontSize: '0.85rem', fontWeight: 500, color: '#1A1015', marginBottom: 10 }}>{card.dish}</p>
+                <span style={{ fontSize: '0.65rem', background: 'rgba(26,16,21,0.1)', borderRadius: 100, padding: '2px 8px', color: '#1A1015', fontWeight: 500 }}>
+                  {card.tag}
+                </span>
+              </div>
+
+              {/* BACK — dish photo (falls back to colour + caption if missing) */}
+              <div
+                className="bb-flip-face bb-flip-back"
+                style={{
+                  background: card.color,
+                  boxShadow: '0 14px 40px rgba(26,16,21,0.22)',
+                }}
+              >
+                <DishPhoto slug={card.slug} alt={card.dish} />
+                <div className="bb-flip-caption">
+                  <p style={{ fontSize: '0.62rem', fontWeight: 700, opacity: 0.8, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 2 }}>
+                    {card.label}
+                  </p>
+                  <p style={{ fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.2 }}>{card.dish}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Hero content — parallax moves opposite cursor */}
       <div
