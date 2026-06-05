@@ -12,6 +12,9 @@ const ENTRIES = [
   { emoji: '🥐', place: 'Bombay Baking Co.', dish: 'Almond Croissant', date: '10 feb', tag: '#ritual', note: 'tuesday routine, officially unlocked', bg: '#FAF1E5', rot: -2.5 },
   { emoji: '🫖', place: 'Chaayos', dish: 'Masala Chai', date: '3 feb', tag: '#everyday magic', note: 'the chai that stopped time', bg: '#F6EDE1', rot: 1 },
   { emoji: '🍷', place: 'Suzette', dish: 'Crêpe Caramel', date: '28 jan', tag: '#rainy day', note: 'window seat. watched the rain.', bg: '#EDE8F6', rot: -0.5 },
+  { emoji: '🍕', place: 'Jamie\'s', dish: 'Truffle Pizza', date: '20 jan', tag: '#late night', note: 'split it at midnight. zero regrets.', bg: '#FBEEE8', rot: 1.5 },
+  { emoji: '🍦', place: 'Minus 30', dish: 'Tahitian Vanilla', date: '14 jan', tag: '#small joys', note: 'one scoop became three. classic.', bg: '#EAF2F4', rot: -2 },
+  { emoji: '🥟', place: 'Mainland China', dish: 'Truffle Dimsum', date: '7 jan', tag: '#comfort food', note: 'steam on my glasses. worth it.', bg: '#F3EFE3', rot: 0.5 },
 ]
 
 export default function DiaryGrid() {
