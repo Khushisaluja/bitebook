@@ -1,22 +1,28 @@
-import Hero from '@/components/landing/Hero'
-import MarqueeStrip from '@/components/ui/MarqueeStrip'
-import DiaryGrid from '@/components/landing/DiaryGrid'
-import ValueStrip from '@/components/landing/ValueStrip'
-import SocialProof from '@/components/landing/SocialProof'
-import FeatureHighlights from '@/components/landing/FeatureHighlights'
-import Footer from '@/components/landing/Footer'
+import '@/styles/site.css'
+import SiteNav from '@/components/site/SiteNav'
+import Hero from '@/components/site/Hero'
+import Marquee from '@/components/site/Marquee'
+import Manifesto from '@/components/site/Manifesto'
+import Walkthrough from '@/components/site/Walkthrough'
+import Gallery from '@/components/site/Gallery'
+import Details from '@/components/site/Details'
+import TasteCard from '@/components/site/TasteCard'
+import Closing from '@/components/site/Closing'
 
 export default function LandingPage() {
   return (
-    <main>
-      <Hero />
-      <MarqueeStrip />
-      <DiaryGrid />
-      <ValueStrip />
-      <SocialProof />
-      <FeatureHighlights />
-      <MarqueeStrip />
-      <Footer />
-    </main>
+    <div className="site">
+      <SiteNav />
+      <main>
+        <Hero />
+        <Marquee />
+        <Manifesto />
+        <Walkthrough />
+        <Gallery />
+        <Details />
+        <TasteCard />
+      </main>
+      <Closing />
+    </div>
   )
 }

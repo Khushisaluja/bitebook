@@ -1,161 +1,177 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
+import { useBites, useWants } from '@/lib/bites'
+import { SEED_BITES, MY_SEED_BITES, MAP_CENTER } from '@/lib/seed'
+import Stars from '@/components/app/Stars'
 
-const SPOTS = [
-  { id: 1, name: 'Blue Tokai Coffee', lat: 19.017, lng: 72.856, dish: 'Ethiopian Pour Over', vibe: '#quiet corner', category: 'cafes' },
-  { id: 2, name: 'Perch Wine Bar', lat: 19.022, lng: 72.832, dish: 'Burrata Toast', vibe: '#soft luxury', category: 'restaurants' },
-  { id: 3, name: 'Naaru', lat: 18.999, lng: 72.841, dish: 'Truffle Ramen', vibe: '#cozy corner', category: 'restaurants' },
-  { id: 4, name: 'Fig & Maple', lat: 19.012, lng: 72.848, dish: 'Ricotta Pancakes', vibe: '#sunday slow', category: 'cafes' },
-  { id: 5, name: 'Suzette', lat: 19.034, lng: 72.839, dish: 'Salted Caramel Crêpe', vibe: '#hidden gem', category: 'hidden' },
-  { id: 6, name: 'La Folie', lat: 18.992, lng: 72.828, dish: 'Pistachio Tart', vibe: '#quiet luxury', category: 'hidden' },
-  { id: 7, name: 'Kopi Klub', lat: 19.026, lng: 72.862, dish: 'Cold Brew Float', vibe: '#golden hour', category: 'cafes' },
-]
+type Kind = 'friends' | 'mine' | 'want'
+interface Spot {
+  id: string
+  name: string
+  lat: number
+  lng: number
+  dish: string
+  rating: number
+  category: string
+  kind: Kind
+}
 
-const FILTERS = ['all', 'cafes', 'restaurants', 'hidden']
+const FILTERS = ['all', 'mine', 'want to try', 'cafes', 'restaurants', 'hidden'] as const
 
-type Spot = typeof SPOTS[0]
+// Deterministically scatter a spot without real coords around the city centre.
+function place(id: string, i: number): [number, number] {
+  let h = 0
+  for (let c = 0; c < id.length; c++) h = (h * 31 + id.charCodeAt(c)) >>> 0
+  const angle = ((h % 360) + i * 47) * (Math.PI / 180)
+  const radius = 0.014 + ((h % 100) / 100) * 0.022
+  return [MAP_CENTER[0] + Math.sin(angle) * radius, MAP_CENTER[1] + Math.cos(angle) * radius]
+}
+
+const PIN: Record<Kind, string> = {
+  friends: `<div style="width:15px;height:15px;border-radius:50%;background:#6E3B47;border:2.5px solid #FAF5F0;box-shadow:0 2px 8px rgba(110,59,71,0.45)"></div>`,
+  mine: `<div style="width:19px;height:19px;border-radius:50%;background:#E0A458;border:3px solid #FAF5F0;box-shadow:0 2px 10px rgba(224,164,88,0.6)"></div>`,
+  want: `<div style="width:15px;height:15px;border-radius:50%;background:#FAF5F0;border:2.5px solid #6E3B47;box-shadow:0 2px 8px rgba(110,59,71,0.3)"></div>`,
+}
 
 export default function MapClient() {
   const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<unknown>(null)
-  const [activeFilter, setActiveFilter] = useState('all')
-  const [activeSpot, setActiveSpot] = useState<Spot | null>(null)
+  const mapInstance = useRef<import('leaflet').Map | null>(null)
+  const layerRef = useRef<import('leaflet').LayerGroup | null>(null)
+  const [filter, setFilter] = useState<string>('all')
+  const [active, setActive] = useState<string | null>(null)
+  const myBites = useBites()
+  const wants = useWants()
 
+  const spots: Spot[] = useMemo(() => {
+    const mine: Spot[] = [
+      ...myBites.map((b, i) => {
+        const [lat, lng] = place(b.id, i)
+        return { id: b.id, name: b.cafe, lat, lng, dish: b.dish, rating: b.rating, category: 'mine', kind: 'mine' as Kind }
+      }),
+      ...MY_SEED_BITES.map((b) => ({ id: b.id, name: b.cafe, lat: b.lat, lng: b.lng, dish: b.dish, rating: b.rating, category: b.category, kind: 'mine' as Kind })),
+    ]
+    const friends: Spot[] = SEED_BITES.map((b) => ({ id: b.id, name: b.cafe, lat: b.lat, lng: b.lng, dish: b.dish, rating: b.rating, category: b.category, kind: 'friends' as Kind }))
+    const want: Spot[] = wants.map((w, i) => {
+      const [lat, lng] = place(w.id, i + 3)
+      return { id: w.id, name: w.cafe, lat, lng, dish: w.dish, rating: 0, category: 'want', kind: 'want' as Kind }
+    })
+    return [...mine, ...friends, ...want]
+  }, [myBites, wants])
+
+  const filtered = useMemo(() => {
+    if (filter === 'all') return spots
+    if (filter === 'mine') return spots.filter((s) => s.kind === 'mine')
+    if (filter === 'want to try') return spots.filter((s) => s.kind === 'want')
+    return spots.filter((s) => s.category === filter)
+  }, [spots, filter])
+
+  // init map once
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return
-
-    const initMap = async () => {
+    if (!mapRef.current || mapInstance.current) return
+    let cancelled = false
+    ;(async () => {
       const L = (await import('leaflet')).default
-
-      const map = L.map(mapRef.current!, {
-        center: [19.012, 72.848],
-        zoom: 13,
-        zoomControl: false,
-      })
-
+      if (cancelled || !mapRef.current) return
+      const map = L.map(mapRef.current, { center: MAP_CENTER, zoom: 13, zoomControl: false })
       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors © CARTO',
-        subdomains: 'abcd',
-        maxZoom: 19,
+        attribution: '© OpenStreetMap · CARTO', subdomains: 'abcd', maxZoom: 19,
       }).addTo(map)
+      mapInstance.current = map
+    })()
+    return () => {
+      cancelled = true
+      mapInstance.current?.remove()
+      mapInstance.current = null
+    }
+  }, [])
 
-      L.control.zoom({ position: 'bottomright' }).addTo(map)
-
-      SPOTS.forEach((spot) => {
-        const icon = L.divIcon({
-          className: '',
-          html: `<div style="width:14px;height:14px;border-radius:50%;background:#6E3B47;border:2.5px solid #FAF5F0;box-shadow:0 2px 8px rgba(110,59,71,0.4);transition:transform 0.2s ease;"></div>`,
-          iconSize: [14, 14],
-          iconAnchor: [7, 7],
-        })
-
-        L.marker([spot.lat, spot.lng], { icon })
-          .addTo(map)
+  // redraw markers on filter/data change
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const L = (await import('leaflet')).default
+      const map = mapInstance.current
+      if (!map || cancelled) return
+      if (layerRef.current) map.removeLayer(layerRef.current)
+      const group = L.layerGroup()
+      filtered.forEach((s) => {
+        const icon = L.divIcon({ className: '', html: PIN[s.kind], iconSize: [18, 18], iconAnchor: [9, 9] })
+        const stars = s.kind === 'want' ? 'want to try' : `${'★'.repeat(Math.round(s.rating))} ${s.rating.toFixed(1)}`
+        L.marker([s.lat, s.lng], { icon })
+          .addTo(group)
           .bindPopup(
-            `<div style="font-family:Satoshi,sans-serif;min-width:180px">
-              <p style="font-size:0.65rem;font-weight:700;color:#B8848F;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">${spot.vibe}</p>
-              <p style="font-size:0.95rem;font-weight:700;color:#1A1015;margin-bottom:2px">${spot.name}</p>
-              <p style="font-size:0.82rem;color:#7A6268">${spot.dish}</p>
+            `<div style="font-family:Satoshi,sans-serif;min-width:150px">
+              <p style="font-size:0.58rem;font-weight:700;color:${s.kind === 'mine' ? '#E0A458' : '#B8848F'};letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px">${s.kind === 'mine' ? 'your bite' : s.kind === 'want' ? 'on your list' : 'a friend loved'} · ${stars}</p>
+              <p style="font-size:0.9rem;font-weight:800;color:#1A1015">${s.name}</p>
+              <p style="font-size:0.8rem;color:#7A6268">${s.dish}</p>
             </div>`,
             { closeButton: false, className: 'bitebook-popup' }
           )
       })
+      group.addTo(map)
+      layerRef.current = group
+    })()
+    return () => { cancelled = true }
+  }, [filtered])
 
-      mapInstanceRef.current = map
-    }
-
-    initMap()
-
-    return () => {
-      if (mapInstanceRef.current) {
-        (mapInstanceRef.current as { remove: () => void }).remove()
-        mapInstanceRef.current = null
-      }
-    }
-  }, [])
-
-  const filtered = activeFilter === 'all' ? SPOTS : SPOTS.filter(s => s.category === activeFilter)
-
-  const flyToSpot = async (spot: Spot) => {
-    setActiveSpot(spot)
-    if (mapInstanceRef.current) {
-      const L = (await import('leaflet')).default
-      void L
-      ;(mapInstanceRef.current as { flyTo: (latlng: [number, number], zoom: number, options: { duration: number }) => void })
-        .flyTo([spot.lat, spot.lng], 15, { duration: 1 })
-    }
+  const flyTo = async (s: Spot) => {
+    setActive(s.id)
+    mapInstance.current?.flyTo([s.lat, s.lng], 15, { duration: 0.9 })
   }
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
-      {/* Sidebar */}
-      <div style={{ width: 300, background: '#FAF5F0', borderRight: '1px solid rgba(110,59,71,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
-        <div style={{ padding: '1.5rem 1.25rem', borderBottom: '1px solid rgba(110,59,71,0.08)' }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#1A1015', marginBottom: '1rem' }}>your map</h2>
-          {/* Filter chips */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-            {FILTERS.map(f => (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                style={{
-                  padding: '0.3rem 0.8rem',
-                  borderRadius: 100,
-                  border: '1.5px solid',
-                  borderColor: activeFilter === f ? '#6E3B47' : 'rgba(110,59,71,0.2)',
-                  background: activeFilter === f ? '#6E3B47' : 'transparent',
-                  color: activeFilter === f ? '#FAF5F0' : '#7A6268',
-                  fontSize: '0.75rem',
-                  fontFamily: 'Satoshi, sans-serif',
-                  fontWeight: 600,
-                  cursor: 'none',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div style={{ position: 'relative', height: '100%', width: '100%' }}>
+      <div ref={mapRef} style={{ position: 'absolute', inset: 0 }} />
 
-        {/* Spot list */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
-          {filtered.map(spot => (
-            <div
-              key={spot.id}
-              onClick={() => flyToSpot(spot)}
-              style={{
-                padding: '0.9rem',
-                borderRadius: 14,
-                cursor: 'none',
-                background: activeSpot?.id === spot.id ? '#F0E6DC' : 'transparent',
-                transition: 'background 0.15s ease',
-                marginBottom: 4,
-              }}
-              onMouseEnter={e => {
-                if (activeSpot?.id !== spot.id) e.currentTarget.style.background = 'rgba(110,59,71,0.04)'
-              }}
-              onMouseLeave={e => {
-                if (activeSpot?.id !== spot.id) e.currentTarget.style.background = 'transparent'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
-                <div>
-                  <p style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1015', marginBottom: 2 }}>{spot.name}</p>
-                  <p style={{ fontSize: '0.78rem', color: '#7A6268' }}>{spot.dish}</p>
-                </div>
-                <span style={{ fontSize: '0.65rem', background: '#E5DDD6', borderRadius: 100, padding: '2px 8px', color: '#6E3B47', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  {spot.vibe}
-                </span>
-              </div>
-            </div>
+      {/* header + filters */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '0.6rem 0.9rem', background: 'linear-gradient(to bottom, rgba(240,230,220,0.95), rgba(240,230,220,0))', zIndex: 500 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.55rem' }}>
+          <h1 style={{ fontSize: '1.35rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1015' }}>your map</h1>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#6E3B47', background: 'rgba(250,245,240,0.9)', borderRadius: 100, padding: '4px 10px' }}>
+            {spots.filter((s) => s.kind !== 'want').length} eaten · {wants.length} to try
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
+          {FILTERS.map((f) => (
+            <button key={f} className="bb-chip" data-active={filter === f} onClick={() => setFilter(f)} style={{ background: filter === f ? '#6E3B47' : 'rgba(250,245,240,0.92)' }}>{f}</button>
           ))}
         </div>
       </div>
 
-      {/* Map container */}
-      <div ref={mapRef} style={{ flex: 1 }} />
+      {/* legend */}
+      <div style={{ position: 'absolute', top: 92, right: 12, zIndex: 500, background: 'rgba(250,245,240,0.92)', backdropFilter: 'blur(6px)', borderRadius: 12, padding: '0.5rem 0.65rem', display: 'flex', flexDirection: 'column', gap: 5, fontSize: '0.64rem', fontWeight: 600, color: '#5C4A50' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><i style={{ width: 9, height: 9, borderRadius: '50%', background: '#E0A458' }} /> you</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><i style={{ width: 9, height: 9, borderRadius: '50%', background: '#6E3B47' }} /> friends</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><i style={{ width: 9, height: 9, borderRadius: '50%', background: '#FAF5F0', border: '2px solid #6E3B47' }} /> to try</span>
+      </div>
+
+      {/* bottom spot carousel */}
+      <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 500, display: 'flex', gap: '0.6rem', overflowX: 'auto', padding: '0 0.9rem', scrollbarWidth: 'none' }}>
+        {filtered.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => flyTo(s)}
+            style={{
+              flexShrink: 0, width: 190, textAlign: 'left', cursor: 'pointer',
+              background: 'rgba(250,245,240,0.96)', backdropFilter: 'blur(10px)',
+              border: active === s.id ? '1.5px solid #6E3B47' : '1.5px solid rgba(110,59,71,0.1)',
+              borderRadius: 16, padding: '0.7rem 0.85rem', boxShadow: '0 6px 20px -8px rgba(74,39,48,0.35)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: s.kind === 'mine' ? '#E0A458' : s.kind === 'want' ? 'transparent' : '#6E3B47', border: s.kind === 'want' ? '2px solid #6E3B47' : 'none' }} />
+              <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1A1015', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</span>
+            </div>
+            <p style={{ fontSize: '0.74rem', color: '#7A6268', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 5 }}>{s.dish}</p>
+            {s.kind === 'want' ? (
+              <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#6E3B47' }}>◦ want to try</span>
+            ) : (
+              <Stars value={s.rating} size={12} />
+            )}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

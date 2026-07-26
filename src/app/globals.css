@@ -273,4 +273,378 @@ a, button, [role="button"] {
 
 .leaflet-container {
   background: #F0E6DC !important;
+  font-family: 'Satoshi', sans-serif;
+}
+
+/* =====================================================================
+   MOBILE APP SHELL  ·  the product (a phone-framed experience)
+   ===================================================================== */
+
+/* Stacks the prototype notice above the phone; see the 900px rule below,
+   where it moves into a side column instead. */
+.bb-app-viewport {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background:
+    radial-gradient(120% 80% at 50% -10%, #F0E6DC 0%, #E5DDD6 55%, #DBCFC6 100%);
+  color: var(--color-text);
+}
+
+/* The phone. Full-bleed on real phones; a framed device on larger screens. */
+.bb-app-phone {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-cream);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+@media (min-width: 600px) {
+  .bb-app-viewport {
+    height: auto;
+    min-height: 100dvh;
+    justify-content: center;
+    padding: 2.25rem 1rem;
+  }
+  .bb-app-phone {
+    flex: 0 0 auto;
+    /* leaves room for the notice stacked above plus the viewport padding */
+    height: min(880px, 72dvh);
+    border-radius: 46px;
+    border: 1px solid rgba(110, 59, 71, 0.14);
+    box-shadow:
+      0 2px 4px rgba(74, 39, 48, 0.06),
+      0 30px 60px -22px rgba(74, 39, 48, 0.42),
+      0 0 0 11px #1A1015,
+      0 0 0 12px rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Wide enough for a second column: the notice moves alongside the device so
+   it stops eating the phone's height. */
+@media (min-width: 900px) {
+  .bb-app-viewport {
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(1.75rem, 4vw, 3.5rem);
+  }
+  .bb-app-phone {
+    height: min(908px, 88dvh);
+  }
+}
+
+/* ---- prototype notice (every /(app) route, never the landing) ---- */
+.bb-notice {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 440px;
+  padding: 0.7rem 1.1rem 0.85rem;
+  overflow: hidden;
+  background: linear-gradient(150deg, #4A2730 0%, #6E3B47 58%, #7E4553 100%);
+  color: var(--color-cream);
+  box-shadow: 0 10px 24px -18px rgba(74, 39, 48, 0.9);
+  z-index: 50;
+}
+
+.bb-notice-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.bb-notice-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #E9C9A0;
+}
+
+/* a slow pulse, so "under construction" reads as a live state */
+.bb-notice-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #E0A458;
+  box-shadow: 0 0 0 0 rgba(224, 164, 88, 0.7);
+  animation: bbNoticePulse 2.6s ease-out infinite;
+}
+@keyframes bbNoticePulse {
+  0% { box-shadow: 0 0 0 0 rgba(224, 164, 88, 0.55); }
+  70% { box-shadow: 0 0 0 7px rgba(224, 164, 88, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(224, 164, 88, 0); }
+}
+
+.bb-notice-wip {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(250, 245, 240, 0.55);
+  white-space: nowrap;
+}
+
+.bb-notice-copy {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: rgba(250, 245, 240, 0.82);
+}
+.bb-notice-copy strong {
+  font-weight: 700;
+  color: var(--color-cream);
+}
+
+.bb-notice-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #E0A458;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(224, 164, 88, 0.4);
+  padding-bottom: 1px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.bb-notice-link:hover {
+  color: #E9C9A0;
+  border-color: #E9C9A0;
+}
+
+@media (min-width: 600px) {
+  .bb-notice {
+    border-radius: 20px;
+    margin-bottom: 0.95rem;
+    padding: 0.85rem 1.2rem 1rem;
+  }
+}
+
+/* side column: sits next to the phone rather than above it */
+@media (min-width: 900px) {
+  .bb-notice {
+    flex: 0 0 clamp(255px, 24vw, 320px);
+    max-width: none;
+    align-self: center;
+    margin-bottom: 0;
+    padding: 1.15rem 1.3rem 1.25rem;
+    border-radius: 22px;
+  }
+  .bb-notice-head {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.4rem 0.75rem;
+    margin-bottom: 0.65rem;
+  }
+  .bb-notice-copy {
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  .bb-notice-link {
+    margin-top: 0.9rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* very short viewports: trim the stacked notice so the phone keeps its room */
+@media (max-height: 620px) and (max-width: 899px) {
+  .bb-notice-copy,
+  .bb-notice-wip {
+    display: none;
+  }
+  .bb-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+  }
+  .bb-notice-head {
+    margin-bottom: 0;
+  }
+  .bb-notice-link {
+    margin-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bb-notice-dot { animation: none; }
+}
+
+/* faux status bar (mockup convention: 9:41) */
+.bb-statusbar {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 1.6rem 0 1.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+  z-index: 30;
+}
+.bb-statusbar-icons { display: flex; align-items: center; gap: 6px; }
+
+/* pill notch for the framed variant only */
+.bb-notch {
+  display: none;
+}
+@media (min-width: 600px) {
+  .bb-notch {
+    display: block;
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 116px;
+    height: 30px;
+    background: #1A1015;
+    border-radius: 0 0 18px 18px;
+    z-index: 40;
+  }
+}
+
+.bb-app-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.bb-app-scroll::-webkit-scrollbar { width: 0; height: 0; }
+
+/* ---- bottom tab bar ---- */
+.bb-tabbar {
+  flex-shrink: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: end;
+  padding: 0.5rem 0.75rem calc(0.55rem + env(safe-area-inset-bottom));
+  background: rgba(250, 245, 240, 0.86);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  border-top: 1px solid rgba(110, 59, 71, 0.1);
+  z-index: 20;
+}
+.bb-tab {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0.35rem 0;
+  color: var(--color-text-muted);
+  transition: color 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-decoration: none;
+}
+.bb-tab[data-active='true'] { color: var(--color-mulberry); }
+.bb-tab:active { transform: scale(0.9); }
+.bb-tab-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.bb-tab-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--color-mulberry);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.bb-tab[data-active='true'] .bb-tab-dot { opacity: 1; }
+
+/* center log button */
+.bb-tab-log {
+  align-self: center;
+  transform: translateY(-14px);
+}
+.bb-tab-log-btn {
+  width: 56px; height: 56px;
+  border-radius: 20px;
+  background: linear-gradient(150deg, #7E4553 0%, #6E3B47 45%, #4A2730 100%);
+  color: var(--color-cream);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 22px -6px rgba(110, 59, 71, 0.6), inset 0 1px 0 rgba(255,255,255,0.18);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: none; cursor: pointer;
+}
+.bb-tab-log:active .bb-tab-log-btn { transform: scale(0.9) rotate(-8deg); }
+
+/* ---- shared app UI ---- */
+.bb-card {
+  background: var(--color-cream);
+  border-radius: 22px;
+  border: 1px solid rgba(110, 59, 71, 0.07);
+  box-shadow: 0 2px 20px -8px rgba(110, 59, 71, 0.18);
+}
+.bb-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 100px;
+  padding: 0.28rem 0.75rem;
+  border: 1.5px solid rgba(110, 59, 71, 0.22);
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.bb-chip[data-active='true'] {
+  background: var(--color-mulberry);
+  border-color: var(--color-mulberry);
+  color: var(--color-cream);
+}
+.bb-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-mulberry-light);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* film-grain scrim reused for photos in-app */
+.bb-photo-grain::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.08; mix-blend-mode: overlay;
+}
+
+/* leaflet popups themed */
+.bitebook-popup .leaflet-popup-content-wrapper {
+  background: #FAF5F0;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px -8px rgba(74, 39, 48, 0.4);
+}
+.bitebook-popup .leaflet-popup-content { margin: 0.85rem 1rem; }
+.bitebook-popup .leaflet-popup-tip { background: #FAF5F0; }
+
+@keyframes bbSheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes bbPop {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
