@@ -809,7 +809,8 @@ export function ProfileScreen() {
         }}
       />
       <div style={{ padding: '0 1rem' }}>
-        <div style={{ marginTop: -30, marginBottom: '0.7rem' }}>
+        {/* positioned so it paints above the cover, which is position:relative */}
+        <div style={{ position: 'relative', zIndex: 1, marginTop: -30, marginBottom: '0.7rem' }}>
           <div
             style={{
               width: 62,

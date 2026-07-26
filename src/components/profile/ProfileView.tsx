@@ -75,7 +75,8 @@ export default function ProfileView() {
 
       <div style={{ padding: '0 1.1rem' }}>
         {/* avatar + name */}
-        <div style={{ marginTop: -34, marginBottom: '0.85rem' }}>
+        {/* positioned so it paints above the cover, which is position:relative */}
+        <div style={{ position: 'relative', zIndex: 1, marginTop: -34, marginBottom: '0.85rem' }}>
           <div style={{ width: 70, height: 70, borderRadius: '50%', background: '#6E3B47', border: '4px solid #FAF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 900, color: '#FAF5F0' }}>k</div>
         </div>
         <div style={{ marginBottom: '1rem' }}>

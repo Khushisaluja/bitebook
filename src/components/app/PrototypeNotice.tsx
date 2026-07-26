@@ -3,12 +3,20 @@
 // Sets expectations for anyone opening the prototype cold, and points back to
 // the rest of the portfolio.
 // ---------------------------------------------------------------------------
+import Link from 'next/link'
 
 const PORTFOLIO = 'https://khushisaluja.framer.website/'
 
 export default function PrototypeNotice() {
   return (
     <aside className="bb-notice bb-photo-grain" role="note" aria-label="prototype notice">
+      <Link href="/" className="bb-notice-back">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M19 12H5M11 18l-6-6 6-6" />
+        </svg>
+        back to the site
+      </Link>
+
       <div className="bb-notice-head">
         <span className="bb-notice-tag">
           <span className="bb-notice-dot" aria-hidden="true" />
